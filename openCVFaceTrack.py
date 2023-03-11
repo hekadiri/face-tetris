@@ -12,8 +12,8 @@ while True:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
         # Draw box around middle of the video feed
-        box_thickness = 2
-        box_color = (255, 0, 0) # Blue color
+        box_thickness = 4
+        box_color = (0, 0, 255) # Blue color
         frame_height, frame_width, _ = frame.shape
         box_height = frame_height // 2 -450# Bit taller than half the frame height
         box_width = box_height +25 # Square box
@@ -42,18 +42,18 @@ while True:
             face_center_y = y + h // 2
 
             if frame_count >= delay:
-                if face_center_x < box_x:
-                    frame_count=0
-                    print('Move right')
-                elif face_center_x > box_x + box_width:
-                    frame_count=0
-                    print('Move left')
-                elif face_center_y < box_y:
+                if face_center_y < box_y:
                     frame_count=0
                     print('Move up')
                 elif face_center_y > box_y + box_height:
                     frame_count=0
                     print('Move down')
+                elif face_center_x < box_x:
+                    frame_count=0
+                    print('Move right')
+                elif face_center_x > box_x + box_width:
+                    frame_count=0
+                    print('Move left')
             else:
                 frame_count += 1
         

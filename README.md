@@ -1,5 +1,6 @@
 # Face Tetris
 
+<img src="./tetraface_logo.jpg" alt="Face Tetris logo" width="20%">
 ## Inspiration
 Our team drew inspiration for our hackathon project from a desire to create a fun and engaging user experience that leveraged cutting-edge technology. We were particularly interested in exploring the potential of openCV for detecting facial and hand movements, and we saw an opportunity to apply this technology to create a unique and interactive control mechanism for the game Tetris. Ultimately, our inspiration came from a desire to explore new ideas, learn from our peers, and showcase our creativity and technical skills in a competitive setting.
 ## What it does

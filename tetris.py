@@ -7,8 +7,8 @@ pygame.font.init()
 
 col = 10
 row = 20
-s_width = 1500
-s_height = 1000
+s_width = 1200
+s_height = 800
 play_width = 300
 play_height = 600
 block_size = 30
@@ -305,6 +305,7 @@ def main(window, movement):
 
     cap = cv2.VideoCapture(0)
     face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+    hand_cascade = cv2.CascadeClassifier('hand.xml')
     delay = 1
     frame_count=0
 
@@ -334,6 +335,86 @@ def main(window, movement):
             if not valid_space(current_piece, grid) and current_piece.y > 0:
                 current_piece.y -= 1
                 change_piece = True
+
+        
+        # Code for hand detection and movement
+        if movement == "hand":
+            ret, frame = cap.read()
+            if frame is not None:
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+                # Draw box around middle of the video feed
+                box_thickness = 4
+                box_color = (0, 0, 255) # Blue color
+                frame_height, frame_width, _ = frame.shape
+                box_height = frame_height // 2 - 450 # Bit taller than half the frame height
+                box_width = box_height +25 # Square box
+                box_y = (frame_height - box_height) // 2
+                box_x = (frame_width - box_width) // 2
+
+                # Draw the box bounds of the middle of the video feed
+                cv2.rectangle(frame, (box_x, box_y), (box_x+box_width-1, box_y+box_height-1), box_color, box_thickness)
+
+                hands = hand_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+                # Find the largest hand
+                max_area = 0
+                max_hand = None
+                for (x, y, w, h) in hands:
+                    if w*h > max_area:
+                        max_area = w*h
+                        max_hand = (x, y, w, h)
+
+                # Track only the largest hand
+                if max_hand is not None:
+                    x, y, w, h = max_hand
+                    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2) # Draws the rectangle around the hand
+
+                    hand_center_x = x + w // 2
+                    hand_center_y = y + h // 2
+
+                    # delay 300 frames to allow for setup
+
+                    setup_time-=1
+                    print(setup_time)
+                    if setup_time <= 0:
+                        if frame_count >= delay:
+                            if hand_center_y < box_y:
+                                frame_count=0
+                                current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
+                                if not valid_space(current_piece, grid):
+                                    current_piece.rotation = current_piece.rotation - 1 % len(current_piece.shape)
+                                print('Move up')
+
+                            elif hand_center_y > box_y + box_height:
+                                frame_count=0
+                                current_piece.y += 1
+                                if not valid_space(current_piece, grid):
+                                    current_piece.y -= 1
+                                print('Move down')
+
+                            elif hand_center_x < box_x:
+                                frame_count=0
+                                current_piece.x += 1  # move x position right
+                                if not valid_space(current_piece, grid):
+                                    current_piece.x -= 1
+                                print('Move right')
+
+                            elif hand_center_x > box_x + box_width:
+                                frame_count=0
+                                current_piece.x -= 1  # move x position left
+                                if not valid_space(current_piece, grid):
+                                    current_piece.x += 1
+                                print('Move left')
+                        else:
+                            frame_count += 1
+
+                    # Flip the frame horizontally
+                    flipped_frame = cv2.flip(frame, 1)
+                    cv2.imshow('frame', flipped_frame)
+
+                    if cv2.waitKey(1) == ord('q'):
+                        break
+    
 
         # Code for face detection and movement
         if movement == "face":

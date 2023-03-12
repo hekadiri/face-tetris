@@ -134,27 +134,6 @@ class Piece(object):
         self.color = shape_colors[shapes.index(shape)]  # choose color from the shape_color list
         self.rotation = 0  # chooses the rotation according to index
 
-class Button(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, color, text, font_size):
-        super().__init__()
-        self.image = pygame.Surface((width, height))
-        self.image.fill(color)
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.font = pygame.font.Font(None, font_size)
-        self.text_surface = self.font.render(text, True, (0, 0, 0))
-        self.text_rect = self.text_surface.get_rect(center=self.rect.center)
-
-    def update(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):
-            return True
-        return False
-
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
-        surface.blit(self.text_surface, self.text_rect)
-
 def create_grid(locked_pos={}):
     grid = [[(0, 0, 0) for x in range(col)] for y in range(row)]  # grid represented rgb tuples
     for y in range(row):
@@ -191,6 +170,7 @@ def check_lost(positions):
     for pos in positions:
         x, y = pos
         if y < 1:
+            print(x,y)
             return True
     return False
 
@@ -304,8 +284,8 @@ def main(window, movement):
     last_score = get_max_score()
 
     cap = cv2.VideoCapture(0)
-    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
     hand_cascade = cv2.CascadeClassifier('hand.xml')
+    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
     delay = 1
     frame_count=0
 
@@ -335,10 +315,86 @@ def main(window, movement):
             if not valid_space(current_piece, grid) and current_piece.y > 0:
                 current_piece.y -= 1
                 change_piece = True
+    
 
-        
-        # Code for hand detection and movement
-        if movement == "hand":
+        # Code for face detection and movement
+        if movement == "face" and current_piece.y>1:
+            ret, frame = cap.read()
+            if frame is not None:
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+                # Draw box around middle of the video feed
+                box_thickness = 4
+                box_color = (0, 0, 255) # Blue color
+                frame_height, frame_width, _ = frame.shape
+                box_height = frame_height // 2 - 450 # Bit taller than half the frame height
+                box_width = box_height +25 # Square box
+                box_y = (frame_height - box_height) // 2
+                box_x = (frame_width - box_width) // 2
+
+                # Draw the box bounds of the middle of the video feed
+                cv2.rectangle(frame, (box_x, box_y), (box_x+box_width-1, box_y+box_height-1), box_color, box_thickness)
+
+                faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+                # Find the largest face
+                max_area = 0
+                max_face = None
+                for (x, y, w, h) in faces:
+                    if w*h > max_area:
+                        max_area = w*h
+                        max_face = (x, y, w, h)
+
+                # Track only the largest face
+                if max_face is not None:
+                    x, y, w, h = max_face
+                    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2) # Draws the rectangle around the face
+
+                    face_center_x = x + w // 2
+                    face_center_y = y + h // 2
+
+                    # delay 300 frames to allow for setup
+
+                    setup_time-=1
+                    # print(setup_time)
+                    if setup_time <= 0:
+                        if frame_count >= delay:
+                            if face_center_y < box_y:
+                                frame_count=0
+                                current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
+                                if not valid_space(current_piece, grid):
+                                    current_piece.rotation = current_piece.rotation - 1 % len(current_piece.shape)
+                                print('Move up')
+
+                            elif face_center_y > box_y + box_height:
+                                frame_count=0
+                                current_piece.y += 1
+                                if not valid_space(current_piece, grid):
+                                    current_piece.y -= 1
+                                print('Move down')
+
+                            elif face_center_x < box_x:
+                                frame_count=0
+                                current_piece.x += 1  # move x position right
+                                if not valid_space(current_piece, grid):
+                                    current_piece.x -= 1
+                                print('Move right')
+
+                            elif face_center_x > box_x + box_width:
+                                frame_count=0
+                                current_piece.x -= 1  # move x position left
+                                if not valid_space(current_piece, grid):
+                                    current_piece.x += 1
+                                print('Move left')
+                        else:
+                            frame_count += 1
+
+                    # Flip the frame horizontally
+                    flipped_frame = cv2.flip(frame, 1)
+                    cv2.imshow('frame', flipped_frame)
+
+
+                # Code for hand detection and movement
+        elif movement == "hand" and current_piece.y>1:
             ret, frame = cap.read()
             if frame is not None:
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -375,7 +431,7 @@ def main(window, movement):
                     # delay 300 frames to allow for setup
 
                     setup_time-=1
-                    print(setup_time)
+                    # print(setup_time)
                     if setup_time <= 0:
                         if frame_count >= delay:
                             if hand_center_y < box_y:
@@ -414,88 +470,9 @@ def main(window, movement):
 
                     if cv2.waitKey(1) == ord('q'):
                         break
-    
-
-        # Code for face detection and movement
-        if movement == "face":
-            ret, frame = cap.read()
-            if frame is not None:
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-                # Draw box around middle of the video feed
-                box_thickness = 4
-                box_color = (0, 0, 255) # Blue color
-                frame_height, frame_width, _ = frame.shape
-                box_height = frame_height // 2 - 450 # Bit taller than half the frame height
-                box_width = box_height +25 # Square box
-                box_y = (frame_height - box_height) // 2
-                box_x = (frame_width - box_width) // 2
-
-                # Draw the box bounds of the middle of the video feed
-                cv2.rectangle(frame, (box_x, box_y), (box_x+box_width-1, box_y+box_height-1), box_color, box_thickness)
-
-                faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
-                # Find the largest face
-                max_area = 0
-                max_face = None
-                for (x, y, w, h) in faces:
-                    if w*h > max_area:
-                        max_area = w*h
-                        max_face = (x, y, w, h)
-
-                # Track only the largest face
-                if max_face is not None:
-                    x, y, w, h = max_face
-                    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2) # Draws the rectangle around the face
-
-                    face_center_x = x + w // 2
-                    face_center_y = y + h // 2
-
-                    # delay 300 frames to allow for setup
-
-                    setup_time-=1
-                    print(setup_time)
-                    if setup_time <= 0:
-                        if frame_count >= delay:
-                            if face_center_y < box_y:
-                                frame_count=0
-                                current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
-                                if not valid_space(current_piece, grid):
-                                    current_piece.rotation = current_piece.rotation - 1 % len(current_piece.shape)
-                                print('Move up')
-
-                            elif face_center_y > box_y + box_height:
-                                frame_count=0
-                                current_piece.y += 1
-                                if not valid_space(current_piece, grid):
-                                    current_piece.y -= 1
-                                print('Move down')
-
-                            elif face_center_x < box_x:
-                                frame_count=0
-                                current_piece.x += 1  # move x position right
-                                if not valid_space(current_piece, grid):
-                                    current_piece.x -= 1
-                                print('Move right')
-
-                            elif face_center_x > box_x + box_width:
-                                frame_count=0
-                                current_piece.x -= 1  # move x position left
-                                if not valid_space(current_piece, grid):
-                                    current_piece.x += 1
-                                print('Move left')
-                        else:
-                            frame_count += 1
-
-                    # Flip the frame horizontally
-                    flipped_frame = cv2.flip(frame, 1)
-                    cv2.imshow('frame', flipped_frame)
-
-                    if cv2.waitKey(1) == ord('q'):
-                        break
 
         # Code for key presses
-        if movement == "keys":
+        elif movement == "keys" and current_piece.y>1:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
@@ -550,7 +527,7 @@ def main(window, movement):
         if check_lost(locked_positions):
             run = False
 
-    draw_text_middle('You Lost', 40, (255, 255, 255), window)
+    draw_text_middle('You Lost', 40, (255, 255, 255), window, 0,0)
     pygame.display.update()
     pygame.time.delay(2000)
     pygame.quit()
@@ -583,7 +560,7 @@ def main_menu(window):
                     movement = "keys"
                     print("keys")
                 if event.key == pygame.K_h:
-                    movemnt = "hand"
+                    movement = "hand"
                     print("hand")
 
     pygame.quit()

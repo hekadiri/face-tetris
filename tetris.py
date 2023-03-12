@@ -391,6 +391,9 @@ def main(window, movement):
                     # Flip the frame horizontally
                     flipped_frame = cv2.flip(frame, 1)
                     cv2.imshow('frame', flipped_frame)
+                    
+                    if cv2.waitKey(1) == ord('q'):
+                        break
 
 
                 # Code for hand detection and movement

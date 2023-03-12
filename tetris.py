@@ -22,6 +22,21 @@ top_left_y = s_height - play_height - 50
 filepath = './highscore.txt'
 fontpath = './fonts/tsuki.ttf'
 fontpath_mario = './fonts/tsuki.ttf'
+logo = pygame.image.load('./images/tetraface_logo.jpg')
+logo = pygame.transform.scale(logo, (logo.get_width() // 8, logo.get_height() // 8))
+
+# colors
+white = (255, 255, 255)
+black = (0, 0, 0)
+red = (255, 0, 0)
+blue = (0, 0, 255)
+green = (0, 255, 0)
+yellow = (255, 255, 0)
+orange = (255, 165, 0)
+purple = (128, 0, 128)
+cyan = (0, 255, 255)
+grey = (128, 128, 128)
+
 
 # sounds
 pygame.mixer.init()
@@ -239,7 +254,7 @@ def draw_window(surface, grid, score=0, last_score=0):
     surface.fill((0, 0, 0))
     pygame.font.init()
     font = pygame.font.Font(fontpath_mario, 65)
-    label = font.render('TETRIS', 1, (255, 255, 255))
+    label = font.render('TetraFace', 1, (255, 255, 255))
     surface.blit(label, ((top_left_x + play_width / 2) - (label.get_width() / 2), 30))
 
     font = pygame.font.Font(fontpath, 30)
@@ -291,8 +306,8 @@ def main(window, movement):
     last_score = get_max_score()
 
     cap = cv2.VideoCapture(0)
-    hand_cascade = cv2.CascadeClassifier('hand.xml')
-    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+    hand_cascade = cv2.CascadeClassifier('./xml/hand.xml')
+    face_cascade = cv2.CascadeClassifier('./xml/haarcascade_frontalface_default.xml')
     delay = 1
     frame_count=0
 
@@ -542,12 +557,13 @@ def main_menu(window):
     while run:
         pygame.font.init()
         window.fill((0, 0, 0))
-        draw_text_middle('Tetris', 80, (255, 255, 255), window, 0, -300)
-        draw_text_middle('Press \'F\' to switch to face recognition', 30, (255, 255, 255), window, 0, -100)
-        draw_text_middle('Press \'K\' to switch to key presses', 30, (255, 255, 255), window, 0, -70)
-        draw_text_middle('Press \'H\' to switch to hand gestures', 30, (255, 255, 255), window, 0, -40)
+        draw_text_middle('TetraFace', 80, white, window, 0, -300)
+        draw_text_middle('Press \'F\' to switch to face recognition', 30, red, window, 0, -50)
+        draw_text_middle('Press \'K\' to switch to key presses', 30, cyan, window, 0, -20)
+        draw_text_middle('Press \'H\' to switch to hand gestures', 30, yellow, window, 0, 10)
         draw_text_middle('Press \'SPACE\' key to begin', 50, (255, 255, 255), window, 0, 100)
         draw_text_middle('Game Mode Selected: ', 50, (255, 255, 255), window, -110, 200)
+        window.blit(logo, (s_width // 2 - logo.get_width() // 2, 160))
 
         if movement == "face":
             draw_text_middle('Face Mode', 50, (255, 255, 255), window, 175, 200)
@@ -584,6 +600,6 @@ def main_menu(window):
 if __name__ == '__main__':
     win = pygame.display.set_mode((s_width, s_height))
 
-    pygame.display.set_caption('Tetris')
+    pygame.display.set_caption('TetraFace')
 
     main_menu(win)

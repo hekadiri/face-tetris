@@ -1,13 +1,14 @@
 import random
 import pygame
 import cv2
+import time
 
 pygame.font.init()
 
 col = 10
 row = 20
-s_width = 800
-s_height = 750
+s_width = 1500
+s_height = 1000
 play_width = 300
 play_height = 600
 block_size = 30
@@ -307,7 +308,14 @@ def main(window, movement):
     delay = 1
     frame_count=0
 
+    if movement == "face":
+        setup_time = 50
+    if movement == "hand":
+        setup_time = 50
+    if movement == "keys":
+        setup_time = 0
 
+    frame_count = 0
     while run:
         grid = create_grid(locked_positions)
         fall_time += clock.get_rawtime()
@@ -337,7 +345,7 @@ def main(window, movement):
                 box_thickness = 4
                 box_color = (0, 0, 255) # Blue color
                 frame_height, frame_width, _ = frame.shape
-                box_height = frame_height // 2 -450# Bit taller than half the frame height
+                box_height = frame_height // 2 - 450 # Bit taller than half the frame height
                 box_width = box_height +25 # Square box
                 box_y = (frame_height - box_height) // 2
                 box_x = (frame_width - box_width) // 2
@@ -362,36 +370,41 @@ def main(window, movement):
                     face_center_x = x + w // 2
                     face_center_y = y + h // 2
 
-                    if frame_count >= delay:
-                        if face_center_y < box_y:
-                            frame_count=0
-                            current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
-                            if not valid_space(current_piece, grid):
-                                current_piece.rotation = current_piece.rotation - 1 % len(current_piece.shape)
-                            print('Move up')
+                    # delay 300 frames to allow for setup
 
-                        elif face_center_y > box_y + box_height:
-                            frame_count=0
-                            current_piece.y += 1
-                            if not valid_space(current_piece, grid):
-                                current_piece.y -= 1
-                            print('Move down')
+                    setup_time-=1
+                    print(setup_time)
+                    if setup_time <= 0:
+                        if frame_count >= delay:
+                            if face_center_y < box_y:
+                                frame_count=0
+                                current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
+                                if not valid_space(current_piece, grid):
+                                    current_piece.rotation = current_piece.rotation - 1 % len(current_piece.shape)
+                                print('Move up')
 
-                        elif face_center_x < box_x:
-                            frame_count=0
-                            current_piece.x += 1  # move x position right
-                            if not valid_space(current_piece, grid):
-                                current_piece.x -= 1
-                            print('Move right')
+                            elif face_center_y > box_y + box_height:
+                                frame_count=0
+                                current_piece.y += 1
+                                if not valid_space(current_piece, grid):
+                                    current_piece.y -= 1
+                                print('Move down')
 
-                        elif face_center_x > box_x + box_width:
-                            frame_count=0
-                            current_piece.x -= 1  # move x position left
-                            if not valid_space(current_piece, grid):
-                                current_piece.x += 1
-                            print('Move left')
-                    else:
-                        frame_count += 1
+                            elif face_center_x < box_x:
+                                frame_count=0
+                                current_piece.x += 1  # move x position right
+                                if not valid_space(current_piece, grid):
+                                    current_piece.x -= 1
+                                print('Move right')
+
+                            elif face_center_x > box_x + box_width:
+                                frame_count=0
+                                current_piece.x -= 1  # move x position left
+                                if not valid_space(current_piece, grid):
+                                    current_piece.x += 1
+                                print('Move left')
+                        else:
+                            frame_count += 1
 
                     # Flip the frame horizontally
                     flipped_frame = cv2.flip(frame, 1)
@@ -400,7 +413,7 @@ def main(window, movement):
                     if cv2.waitKey(1) == ord('q'):
                         break
 
-        # code for key presses
+        # Code for key presses
         if movement == "keys":
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -428,30 +441,30 @@ def main(window, movement):
                         if not valid_space(current_piece, grid):
                             current_piece.rotation = current_piece.rotation - 1 % len(current_piece.shape)
 
+        if setup_time <= 0:
+            piece_pos = convert_shape_format(current_piece)
 
-        piece_pos = convert_shape_format(current_piece)
+            for i in range(len(piece_pos)):
+                x, y = piece_pos[i]
+                if y >= 0:
+                    grid[y][x] = current_piece.color
 
-        for i in range(len(piece_pos)):
-            x, y = piece_pos[i]
-            if y >= 0:
-                grid[y][x] = current_piece.color
+            if change_piece:
+                for pos in piece_pos:
+                    p = (pos[0], pos[1])
+                    locked_positions[p] = current_piece.color
+                current_piece = next_piece
+                next_piece = get_shape()
+                change_piece = False
+                score += clear_rows(grid, locked_positions) * 10
+                update_score(score)
 
-        if change_piece:
-            for pos in piece_pos:
-                p = (pos[0], pos[1])
-                locked_positions[p] = current_piece.color
-            current_piece = next_piece
-            next_piece = get_shape()
-            change_piece = False
-            score += clear_rows(grid, locked_positions) * 10
-            update_score(score)
+                if last_score < score:
+                    last_score = score
 
-            if last_score < score:
-                last_score = score
-
-        draw_window(window, grid, score, last_score)
-        draw_next_shape(next_piece, window)
-        pygame.display.update()
+            draw_window(window, grid, score, last_score)
+            draw_next_shape(next_piece, window)
+            pygame.display.update()
 
         if check_lost(locked_positions):
             run = False
@@ -466,9 +479,12 @@ def main_menu(window):
     movement = "keys"
 
     while run:
-        draw_text_middle('Press \'SPACE\' key to begin', 50, (255, 255, 255), window, 0, -20)
-        draw_text_middle('Press \'F\' to switch to face recognition', 30, (255, 255, 255), window, 0, 40)
-        draw_text_middle('Press \'K\' to switch to key presses', 30, (255, 255, 255), window, 0, 65)
+        draw_text_middle('Tetris', 80, (255, 255, 255), window, 0, -300)
+        draw_text_middle('Press \'F\' to switch to face recognition', 30, (255, 255, 255), window, 0, -100)
+        draw_text_middle('Press \'K\' to switch to key presses', 30, (255, 255, 255), window, 0, -70)
+        draw_text_middle('Press \'H\' to switch to hand gestures', 30, (255, 255, 255), window, 0, -40)
+        draw_text_middle('Press \'SPACE\' key to begin', 50, (255, 255, 255), window, 0, 100)
+       
         pygame.display.update()
 
         for event in pygame.event.get():
@@ -476,7 +492,7 @@ def main_menu(window):
                 run = False
                 pygame.display.quit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
                     print(movement)
                     main(window, movement)
                 if event.key == pygame.K_f:
@@ -485,6 +501,9 @@ def main_menu(window):
                 if event.key == pygame.K_k:
                     movement = "keys"
                     print("keys")
+                if event.key == pygame.K_h:
+                    movemnt = "hand"
+                    print("hand")
 
     pygame.quit()
 

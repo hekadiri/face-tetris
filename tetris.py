@@ -2,8 +2,14 @@ import random
 import pygame
 import cv2
 import time
+import pygame.mixer
+import os
+import subprocess
 
-pygame.font.init()
+pygame.mixer.init()
+
+
+
 
 col = 10
 row = 20
@@ -20,6 +26,10 @@ top_left_y = s_height - play_height - 50
 filepath = './highscore.txt'
 fontpath = './tsuki.ttf'
 fontpath_mario = './tsuki.ttf'
+
+pygame.mixer.music.load("./music.mp3")
+pygame.mixer.music.play(loops=-1)
+
 
 S = [['.....',
       '.....',
@@ -473,10 +483,6 @@ def main(window, movement):
         # Code for key presses
         elif movement == "keys" and current_piece.y>1:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    run = False
-                    pygame.display.quit()
-
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         current_piece.x -= 1
@@ -529,28 +535,38 @@ def main(window, movement):
     draw_text_middle('You Lost', 40, (255, 255, 255), window, 0,0)
     pygame.display.update()
     pygame.time.delay(2000)
-    pygame.quit()
 
 def main_menu(window):
     run = True
     movement = "keys"
 
     while run:
+        pygame.font.init()
+        window.fill((0, 0, 0))
         draw_text_middle('Tetris', 80, (255, 255, 255), window, 0, -300)
         draw_text_middle('Press \'F\' to switch to face recognition', 30, (255, 255, 255), window, 0, -100)
         draw_text_middle('Press \'K\' to switch to key presses', 30, (255, 255, 255), window, 0, -70)
         draw_text_middle('Press \'H\' to switch to hand gestures', 30, (255, 255, 255), window, 0, -40)
         draw_text_middle('Press \'SPACE\' key to begin', 50, (255, 255, 255), window, 0, 100)
+        draw_text_middle('Game Mode Selected: ', 50, (255, 255, 255), window, -110, 200)
+
+        if movement == "face":
+            draw_text_middle('Face Mode', 50, (255, 255, 255), window, 175, 200)
+        elif movement == "keys":
+            draw_text_middle('Keys Mode', 50, (255, 255, 255), window, 175, 200)
+        elif movement == "hand":
+            draw_text_middle('Hand Mode', 50, (255, 255, 255), window, 175, 200)
        
         pygame.display.update()
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-                pygame.display.quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
-                    print(movement)
+                    window.fill((0, 0, 0))
+                    i = 200
+                    while i < 0:
+                       draw_text_middle('Starting :)', 60, (255, 255, 255), window, 0, 0)
+                       i -= 1
                     main(window, movement)
                 if event.key == pygame.K_f:
                     movement = "face"
@@ -561,11 +577,14 @@ def main_menu(window):
                 if event.key == pygame.K_h:
                     movement = "hand"
                     print("hand")
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_q:
+                    run = False
 
     pygame.quit()
 
 if __name__ == '__main__':
     win = pygame.display.set_mode((s_width, s_height))
+
     pygame.display.set_caption('Tetris')
 
     main_menu(win)

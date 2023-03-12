@@ -9,7 +9,7 @@ import subprocess
 # varibales
 col = 10
 row = 20
-s_width = 1000
+s_width = 800
 s_height = 750
 camera_dim=474
 play_width = 300
@@ -598,6 +598,9 @@ def main_menu(window):
     pygame.quit()
 
 if __name__ == '__main__':
+    window_start_pos_x = 750
+    window_start_pos_y = 700
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (window_start_pos_x,window_start_pos_y)
     win = pygame.display.set_mode((s_width, s_height))
 
     pygame.display.set_caption('TetraFace')

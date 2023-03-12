@@ -20,14 +20,14 @@ top_left_y = s_height - play_height - 50
 
 # fonts
 filepath = './highscore.txt'
-fontpath = './tsuki.ttf'
-fontpath_mario = './tsuki.ttf'
+fontpath = './fonts/tsuki.ttf'
+fontpath_mario = './fonts/tsuki.ttf'
 
 # sounds
 pygame.mixer.init()
-pygame.mixer.music.load("./music.mp3")
+pygame.mixer.music.load("./sounds/music.mp3")
 pygame.mixer.music.play(loops=-1)
-clear_line_sound = pygame.mixer.Sound('./clear.mp3')
+clear_line_sound = pygame.mixer.Sound('./sounds/clear.mp3')
 
 # shapes
 S = [['.....',

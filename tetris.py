@@ -6,11 +6,7 @@ import pygame.mixer
 import os
 import subprocess
 
-pygame.mixer.init()
-
-
-
-
+# varibales
 col = 10
 row = 20
 s_width = 1000
@@ -19,18 +15,21 @@ camera_dim=474
 play_width = 300
 play_height = 600
 block_size = 30
-
 top_left_x = (s_width - play_width) // 2
 top_left_y = s_height - play_height - 50
 
+# fonts
 filepath = './highscore.txt'
 fontpath = './tsuki.ttf'
 fontpath_mario = './tsuki.ttf'
 
+# sounds
+pygame.mixer.init()
 pygame.mixer.music.load("./music.mp3")
 pygame.mixer.music.play(loops=-1)
+clear_line_sound = pygame.mixer.Sound('./clear.mp3')
 
-
+# shapes
 S = [['.....',
       '.....',
       '..00.',
@@ -133,7 +132,6 @@ T = [['.....',
       '..0..',
       '.....']]
 
-# index represents the shape
 shapes = [S, Z, I, O, J, L, T]
 shape_colors = [(0, 255, 0), (255, 0, 0), (0, 255, 255), (255, 255, 0), (255, 165, 0), (0, 0, 255), (128, 0, 128)]
 
@@ -213,6 +211,7 @@ def clear_rows(grid, locked):
             for j in range(len(grid_row)):
                 try:
                     del locked[(j, i)]
+                    clear_line_sound.play()
                 except ValueError:
                     continue
     if increment > 0:

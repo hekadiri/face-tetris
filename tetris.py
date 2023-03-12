@@ -357,41 +357,40 @@ def main(window, movement):
                     setup_time-=1
                     # print(setup_time)
                     if setup_time <= 0:
-                        if frame_count >= delay:
-                            if face_center_y < box_y:
-                                frame_count=0
-                                current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
-                                if not valid_space(current_piece, grid):
-                                    current_piece.rotation = current_piece.rotation - 1 % len(current_piece.shape)
-                                print('Move up')
+                        if face_center_y < box_y and frame_count >= delay*3:
+                            frame_count=0
+                            current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
+                            if not valid_space(current_piece, grid):
+                                current_piece.rotation = current_piece.rotation - 1 % len(current_piece.shape)
+                            print('Move up')
 
-                            elif face_center_y > box_y + box_height:
-                                frame_count=0
-                                current_piece.y += 1
-                                if not valid_space(current_piece, grid):
-                                    current_piece.y -= 1
-                                print('Move down')
+                        elif face_center_y > box_y + box_height  and frame_count >= delay:
+                            frame_count=0
+                            current_piece.y += 1
+                            if not valid_space(current_piece, grid):
+                                current_piece.y -= 1
+                            print('Move down')
 
-                            elif face_center_x < box_x:
-                                frame_count=0
-                                current_piece.x += 1  # move x position right
-                                if not valid_space(current_piece, grid):
-                                    current_piece.x -= 1
-                                print('Move right')
+                        elif face_center_x < box_x  and frame_count >= delay:
+                            frame_count=0
+                            current_piece.x += 1  # move x position right
+                            if not valid_space(current_piece, grid):
+                                current_piece.x -= 1
+                            print('Move right')
 
-                            elif face_center_x > box_x + box_width:
-                                frame_count=0
-                                current_piece.x -= 1  # move x position left
-                                if not valid_space(current_piece, grid):
-                                    current_piece.x += 1
-                                print('Move left')
+                        elif face_center_x > box_x + box_width  and frame_count >= delay:
+                            frame_count=0
+                            current_piece.x -= 1  # move x position left
+                            if not valid_space(current_piece, grid):
+                                current_piece.x += 1
+                            print('Move left')
                         else:
                             frame_count += 1
 
                     # Flip the frame horizontally
                     flipped_frame = cv2.flip(frame, 1)
                     cv2.imshow('frame', flipped_frame)
-                    
+
                     if cv2.waitKey(1) == ord('q'):
                         break
 
@@ -436,34 +435,33 @@ def main(window, movement):
                     setup_time-=1
                     # print(setup_time)
                     if setup_time <= 0:
-                        if frame_count >= delay:
-                            if hand_center_y < box_y:
-                                frame_count=0
-                                current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
-                                if not valid_space(current_piece, grid):
-                                    current_piece.rotation = current_piece.rotation - 1 % len(current_piece.shape)
-                                print('Move up')
+                        if hand_center_y < box_y and frame_count >= delay*3:
+                            frame_count=0
+                            current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
+                            if not valid_space(current_piece, grid):
+                                current_piece.rotation = current_piece.rotation - 1 % len(current_piece.shape)
+                            print('Move up')
 
-                            elif hand_center_y > box_y + box_height:
-                                frame_count=0
-                                current_piece.y += 1
-                                if not valid_space(current_piece, grid):
-                                    current_piece.y -= 1
-                                print('Move down')
+                        elif hand_center_y > box_y + box_height and frame_count >= delay:
+                            frame_count=0
+                            current_piece.y += 1
+                            if not valid_space(current_piece, grid):
+                                current_piece.y -= 1
+                            print('Move down')
 
-                            elif hand_center_x < box_x:
-                                frame_count=0
-                                current_piece.x += 1  # move x position right
-                                if not valid_space(current_piece, grid):
-                                    current_piece.x -= 1
-                                print('Move right')
+                        elif hand_center_x < box_x and frame_count >= delay:
+                            frame_count=0
+                            current_piece.x += 1  # move x position right
+                            if not valid_space(current_piece, grid):
+                                current_piece.x -= 1
+                            print('Move right')
 
-                            elif hand_center_x > box_x + box_width:
-                                frame_count=0
-                                current_piece.x -= 1  # move x position left
-                                if not valid_space(current_piece, grid):
-                                    current_piece.x += 1
-                                print('Move left')
+                        elif hand_center_x > box_x + box_width and frame_count >= delay:
+                            frame_count=0
+                            current_piece.x -= 1  # move x position left
+                            if not valid_space(current_piece, grid):
+                                current_piece.x += 1
+                            print('Move left')
                         else:
                             frame_count += 1
 

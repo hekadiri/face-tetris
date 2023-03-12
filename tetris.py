@@ -7,8 +7,9 @@ pygame.font.init()
 
 col = 10
 row = 20
-s_width = 1200
-s_height = 800
+s_width = 1000
+s_height = 750
+camera_dim=474
 play_width = 300
 play_height = 600
 block_size = 30
@@ -240,10 +241,7 @@ def draw_window(surface, grid, score=0, last_score=0):
 
     label_hi = font.render('HIGHSCORE   ' + str(last_score), 1, (255, 255, 255))
 
-    start_x_hi = top_left_x - 240
-    start_y_hi = top_left_y + 200
-
-    surface.blit(label_hi, (start_x_hi + 20, start_y_hi + 200))
+    surface.blit(label_hi, (start_x, start_y + 250))
 
     for i in range(row):
         for j in range(col):
@@ -405,8 +403,8 @@ def main(window, movement):
                 box_thickness = 4
                 box_color = (0, 0, 255) # Blue color
                 frame_height, frame_width, _ = frame.shape
-                box_height = frame_height // 2 - 450 # Bit taller than half the frame height
-                box_width = box_height +25 # Square box
+                box_height = frame_height // 2 - 200 # Bit taller than half the frame height
+                box_width = box_height - 225 # Square box
                 box_y = (frame_height - box_height) // 2
                 box_x = (frame_width - box_width) // 2
 

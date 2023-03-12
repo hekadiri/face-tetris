@@ -276,7 +276,7 @@ def main(window):
     next_piece = get_shape()
     clock = pygame.time.Clock()
     fall_time = 0
-    fall_speed = 0.35
+    fall_speed = 1
     level_time = 0
     score = 0
     last_score = get_max_score()
@@ -308,7 +308,7 @@ def main(window):
         ret, frame = cap.read()
         if frame is not None:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            
+
             # Draw box around middle of the video feed
             box_thickness = 4
             box_color = (0, 0, 255) # Blue color
@@ -320,7 +320,7 @@ def main(window):
 
             # Draw the box bounds of the middle of the video feed
             cv2.rectangle(frame, (box_x, box_y), (box_x+box_width-1, box_y+box_height-1), box_color, box_thickness)
-            
+
             faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
             # Find the largest face
             max_area = 0

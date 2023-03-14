@@ -362,9 +362,10 @@ def main(window, movement):
                 max_area = 0
                 max_face = None
                 for (x, y, w, h) in faces:
-                    if w*h > max_area:
-                        max_area = w*h
-                        max_face = (x, y, w, h)
+                    if w>100 and h>100:
+                        if w*h > max_area:
+                            max_area = w*h
+                            max_face = (x, y, w, h)
 
                 # Track only the largest face
                 if max_face is not None:
@@ -379,7 +380,7 @@ def main(window, movement):
                     setup_time-=1
                     # print(setup_time)
                     if setup_time <= 0:
-                        if face_center_y < box_y and frame_count >= delay*3:
+                        if face_center_y < box_y and frame_count >= delay*12:
                             frame_count=0
                             current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
                             if not valid_space(current_piece, grid):
@@ -440,9 +441,10 @@ def main(window, movement):
                 max_area = 0
                 max_hand = None
                 for (x, y, w, h) in hands:
-                    if w*h > max_area:
-                        max_area = w*h
-                        max_hand = (x, y, w, h)
+                    if w>100 and h>100:
+                        if w*h > max_area:
+                            max_area = w*h
+                            max_hand = (x, y, w, h)
 
                 # Track only the largest hand
                 if max_hand is not None:
@@ -457,7 +459,7 @@ def main(window, movement):
                     setup_time-=1
                     # print(setup_time)
                     if setup_time <= 0:
-                        if hand_center_y < box_y and frame_count >= delay*3:
+                        if hand_center_y < box_y and frame_count >= delay*12:
                             frame_count=0
                             current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
                             if not valid_space(current_piece, grid):
@@ -471,14 +473,14 @@ def main(window, movement):
                                 current_piece.y -= 1
                             print('Move down')
 
-                        elif hand_center_x < box_x and frame_count >= delay:
+                        elif hand_center_x < box_x and frame_count >= delay*4:
                             frame_count=0
                             current_piece.x += 1  # move x position right
                             if not valid_space(current_piece, grid):
                                 current_piece.x -= 1
                             print('Move right')
 
-                        elif hand_center_x > box_x + box_width and frame_count >= delay:
+                        elif hand_center_x > box_x + box_width and frame_count >= delay*4:
                             frame_count=0
                             current_piece.x -= 1  # move x position left
                             if not valid_space(current_piece, grid):
